@@ -21,6 +21,8 @@ import org.apache.dolphinscheduler.common.enums.StateEventType;
 import org.apache.dolphinscheduler.common.enums.WorkflowExecutionStatus;
 import org.apache.dolphinscheduler.dao.entity.ProcessInstance;
 import org.apache.dolphinscheduler.server.master.cache.ProcessInstanceExecCacheManager;
+import org.apache.dolphinscheduler.server.master.listener.ListenerBus;
+import org.apache.dolphinscheduler.server.master.listener.event.EventWorkflowSubmitted;
 import org.apache.dolphinscheduler.server.master.metrics.ProcessInstanceMetrics;
 import org.apache.dolphinscheduler.server.master.runner.StateWheelExecuteThread;
 import org.apache.dolphinscheduler.server.master.runner.WorkflowExecuteRunnable;
@@ -47,6 +49,9 @@ public class WorkflowStartEventHandler implements WorkflowEventHandler {
     @Autowired
     private WorkflowExecuteThreadPool workflowExecuteThreadPool;
 
+    @Autowired
+    private ListenerBus listenerBus;
+
     @Override
     public void handleWorkflowEvent(final WorkflowEvent workflowEvent) throws WorkflowEventHandleError {
         log.info("Handle workflow start event, begin to start a workflow, event: {}", workflowEvent);
@@ -63,6 +68,7 @@ public class WorkflowStartEventHandler implements WorkflowEventHandler {
                 .thenAccept(workflowSubmitStatus -> {
                     if (WorkflowSubmitStatus.SUCCESS == workflowSubmitStatus) {
                         log.info("Success submit the workflow instance");
+                        listenerBus.postEvent(new EventWorkflowSubmitted());
                         if (processInstance.getTimeout() > 0) {
                             stateWheelExecuteThread.addProcess4TimeoutCheck(processInstance);
                         }

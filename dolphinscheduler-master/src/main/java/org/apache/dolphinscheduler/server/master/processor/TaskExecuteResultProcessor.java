@@ -23,6 +23,8 @@ import org.apache.dolphinscheduler.remote.command.Message;
 import org.apache.dolphinscheduler.remote.command.MessageType;
 import org.apache.dolphinscheduler.remote.command.task.TaskExecuteResultMessage;
 import org.apache.dolphinscheduler.remote.processor.MasterRpcProcessor;
+import org.apache.dolphinscheduler.server.master.listener.ListenerBus;
+import org.apache.dolphinscheduler.server.master.listener.event.EventTaskFinished;
 import org.apache.dolphinscheduler.server.master.processor.queue.TaskEvent;
 import org.apache.dolphinscheduler.server.master.processor.queue.TaskEventService;
 
@@ -42,6 +44,9 @@ public class TaskExecuteResultProcessor implements MasterRpcProcessor {
 
     @Autowired
     private TaskEventService taskEventService;
+
+    @Autowired
+    private ListenerBus listenerBus;
 
     /**
      * task final result response
@@ -63,6 +68,9 @@ public class TaskExecuteResultProcessor implements MasterRpcProcessor {
             log.info("Received task execute result, event: {}", taskResultEvent);
 
             taskEventService.addEvent(taskResultEvent);
+            if (taskResultEvent.getState().isSuccess()) {
+                listenerBus.postEvent(new EventTaskFinished());
+            }
         }
     }
 

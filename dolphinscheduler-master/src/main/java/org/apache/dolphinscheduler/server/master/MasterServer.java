@@ -23,6 +23,8 @@ import org.apache.dolphinscheduler.common.lifecycle.ServerLifeCycleManager;
 import org.apache.dolphinscheduler.common.thread.ThreadUtils;
 import org.apache.dolphinscheduler.plugin.task.api.TaskPluginManager;
 import org.apache.dolphinscheduler.scheduler.api.SchedulerApi;
+import org.apache.dolphinscheduler.server.master.listener.ListenerBus;
+import org.apache.dolphinscheduler.server.master.listener.MyListener;
 import org.apache.dolphinscheduler.server.master.registry.MasterRegistryClient;
 import org.apache.dolphinscheduler.server.master.rpc.MasterRPCServer;
 import org.apache.dolphinscheduler.server.master.runner.EventExecuteService;
@@ -73,6 +75,9 @@ public class MasterServer implements IStoppable {
     @Autowired
     private MasterRPCServer masterRPCServer;
 
+    @Autowired
+    private ListenerBus listenerBus;
+
     public static void main(String[] args) {
         Thread.currentThread().setName(Constants.THREAD_NAME_MASTER_SERVER);
         SpringApplication.run(MasterServer.class);
@@ -99,6 +104,9 @@ public class MasterServer implements IStoppable {
         this.failoverExecuteThread.start();
 
         this.schedulerApi.start();
+
+        this.listenerBus.start();
+        this.listenerBus.addListener(new MyListener());
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (!ServerLifeCycleManager.isStopped()) {
