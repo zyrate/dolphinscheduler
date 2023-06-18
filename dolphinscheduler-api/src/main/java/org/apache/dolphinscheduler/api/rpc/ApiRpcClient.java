@@ -25,13 +25,22 @@ import org.apache.dolphinscheduler.remote.utils.Host;
 
 import org.springframework.stereotype.Component;
 
+import lombok.NonNull;
+
 @Component
 public class ApiRpcClient {
 
     private final NettyRemotingClient nettyRemotingClient;
 
+    private static final long DEFAULT_TIME_OUT_MILLS = 10_000L;
+    
     public ApiRpcClient() {
         this.nettyRemotingClient = new NettyRemotingClient(new NettyClientConfig());
+    }
+
+    public Message sendSyncCommand(@NonNull Host host,
+                                   @NonNull Message rpcMessage) throws RemotingException, InterruptedException {
+        return nettyRemotingClient.sendSync(host, rpcMessage, DEFAULT_TIME_OUT_MILLS);
     }
 
     public void send(Host host, Message message) throws RemotingException {

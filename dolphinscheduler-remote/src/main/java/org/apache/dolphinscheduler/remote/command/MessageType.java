@@ -36,6 +36,15 @@ public enum MessageType {
      */
     TASK_EXECUTE_START,
 
+    /**
+     * register a listener, from api to master
+     */
+    LISTENER_REGISTER_REQUEST,
+    LISTENER_REGISTER_RESPONSE,
+
+
+
+
     TASK_DISPATCH_REQUEST,
     TASK_DISPATCH_RESPONSE,
 

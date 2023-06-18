@@ -44,6 +44,7 @@ import static org.apache.dolphinscheduler.api.enums.Status.VIEW_UDF_FUNCTION_ERR
 import org.apache.dolphinscheduler.api.aspect.AccessLogAnnotation;
 import org.apache.dolphinscheduler.api.dto.resources.DeleteDataTransferResponse;
 import org.apache.dolphinscheduler.api.exceptions.ApiException;
+import org.apache.dolphinscheduler.api.service.ListenerService;
 import org.apache.dolphinscheduler.api.service.ResourcesService;
 import org.apache.dolphinscheduler.api.service.UdfFuncService;
 import org.apache.dolphinscheduler.api.utils.PageInfo;
@@ -100,6 +101,8 @@ public class ResourcesController extends BaseController {
     private ResourcesService resourceService;
     @Autowired
     private UdfFuncService udfFuncService;
+    @Autowired
+    private ListenerService listenerService;
 
     /**
      * @param loginUser login user
@@ -773,6 +776,19 @@ public class ResourcesController extends BaseController {
         return resourceService.queryResourceByFullName(loginUser, fullName, tenantCode, type);
     }
 
+//     @Operation(summary = "queryResourceBaseDir", description = "QUERY_RESOURCE_BASE_DIR")
+//     @Parameters({
+//             @Parameter(name = "type", description = "RESOURCE_TYPE", required = true, schema = @Schema(implementation = ResourceType.class))
+//     })
+//     @GetMapping(value = "/listener")
+//     @ResponseStatus(HttpStatus.OK)
+//     @ApiException(RESOURCE_NOT_EXIST)
+//     @AccessLogAnnotation
+//     public Result<Object> registerListener(@Parameter(hidden = true) @RequestAttribute(value = Constants.SESSION_USER) User loginUser,
+//                                                @RequestParam(value = "type") ResourceType type) {
+//         return listenerService.register(loginUser, 10);
+//     }
+
     @Operation(summary = "queryResourceBaseDir", description = "QUERY_RESOURCE_BASE_DIR")
     @Parameters({
             @Parameter(name = "type", description = "RESOURCE_TYPE", required = true, schema = @Schema(implementation = ResourceType.class))
@@ -785,4 +801,18 @@ public class ResourcesController extends BaseController {
                                                @RequestParam(value = "type") ResourceType type) {
         return resourceService.queryResourceBaseDir(loginUser, type);
     }
+
+    @Operation(summary = "registerListener", description = "REGISTER_LISTENER")
+    @Parameters({
+            @Parameter(name = "id", description = "LISTENER_ID", required = true, schema = @Schema(implementation = int.class, example = "1001"))
+    })
+    @PutMapping(value = "/listener/{id}/register")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiException(RESOURCE_NOT_EXIST)
+    @AccessLogAnnotation
+    public Result registerListener(@Parameter(hidden = true) @RequestAttribute(value = Constants.SESSION_USER) User loginUser,
+                                @PathVariable(value = "id") int listenerId) {
+        return listenerService.register(loginUser, listenerId);
+    }
+
 }
